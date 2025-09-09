@@ -10,11 +10,23 @@ import TransactionsPage from "./pages/TransactionsPage";
 
 import ChartsPage from "./pages/ChartsPage";  // ✅ import charts page
 import Footer from "./components/Footer";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <AuthProvider>
-     
+        <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />

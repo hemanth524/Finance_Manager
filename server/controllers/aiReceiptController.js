@@ -4,6 +4,8 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const path = require('path');
 
+console.log(process.env.GEMINI_API_KEY);
+
 // Initialize Gemini AI client
 const gemini = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -11,9 +13,7 @@ const gemini = new GoogleGenAI({
 
 const processAIReceipt = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-
-    
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });    
 
     const ext = path.extname(req.file.originalname).toLowerCase();
     let receiptText = '';

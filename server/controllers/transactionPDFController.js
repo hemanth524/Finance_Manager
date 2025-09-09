@@ -13,7 +13,7 @@ const processTransactionPDF = async (req, res) => {
     console.log("📄 Received PDF:", req.file.path);
 
     // Step 1: Extract text directly from PDF
-    const buffer = fs.readFileSync(req.file.path);
+    const buffer = req.file.buffer;
     const pdfData = await pdfParse(buffer);
     let rawText = pdfData.text.trim();
 
@@ -66,7 +66,7 @@ Text:
     );
 
     // Step 5: Cleanup uploaded file
-    fs.unlink(req.file.path, () => {});
+    // fs.unlink(req.file.path, () => {});
 
     // Step 6: Return saved transactions
     res.json({
