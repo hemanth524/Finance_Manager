@@ -22,7 +22,7 @@ export default function Navbar() {
     "px-4 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 cursor-pointer";
 
   return (
-    <nav className=" top-0 left-0 w-full z-50 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white px-6 py-3 flex items-center justify-between shadow-lg">
+    <nav className="relative top-0 left-0 w-full z-50 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white px-6 py-3 flex items-center justify-between shadow-lg">
       {/* Brand / Logo */}
       <h2
         className="text-2xl font-extrabold tracking-wide cursor-pointer"
@@ -74,7 +74,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {isOpen && user && (
-        <div className="absolute top-full left-0 w-full bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white flex flex-col items-center py-4 md:hidden space-y-3 shadow-lg">
+        <div className="absolute top-full left-0 w-full bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white flex flex-col items-center py-4 md:hidden space-y-3 shadow-lg transition-all duration-300">
           {/* Mobile links */}
           <Link className={linkClasses} to="/dashboard" onClick={() => setIsOpen(false)}>Dashboard</Link>
           <Link className={linkClasses} to="/add-transaction" onClick={() => setIsOpen(false)}>Add Transaction</Link>
