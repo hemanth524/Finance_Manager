@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api";
 import { 
@@ -7,7 +7,7 @@ import {
   Filter, Download, Bell, Settings, User, Search, RefreshCw, AlertCircle
 } from "lucide-react";
 
-const Dashboard = () => {
+const Dashboard = ({ refreshFlag }) => {
   const { user } = useContext(AuthContext);
   const [timeFilter, setTimeFilter] = useState("month");
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,7 @@ const Dashboard = () => {
     recentTransactions: [],
     expensesByCategory: [],
     incomeByCategory: [],
-    monthlyTrend: []
+    monthlyTrend: [],
   });
   const [error, setError] = useState(null);
 
@@ -39,19 +39,23 @@ const Dashboard = () => {
     return { from: from.toISOString(), to: now.toISOString() };
   };
 
-  const fetchDashboardData = async () => {
+  // Fetch dashboard data
+  const fetchDashboardData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
       const { from, to } = getDateRange();
 
+      // Fetch all transactions for calculations
       const transactionsRes = await API.get(`/transactions?forChart=true&from=${from}&to=${to}`);
-      const allTransactions = transactionsRes.data;
+      const allTransactions = transactionsRes.data.transactions || transactionsRes.data;
 
+      // Fetch recent transactions
       const recentRes = await API.get(`/transactions?page=1&limit=5&from=${from}&to=${to}`);
       const recentTransactions = recentRes.data.transactions || recentRes.data;
 
+      // Fetch summary by type
       const expenseSummaryRes = await API.get(`/transactions/summary?type=expense&from=${from}&to=${to}`);
       const incomeSummaryRes = await API.get(`/transactions/summary?type=income&from=${from}&to=${to}`);
 
@@ -72,7 +76,7 @@ const Dashboard = () => {
         recentTransactions,
         expensesByCategory: expenseSummaryRes.data,
         incomeByCategory: incomeSummaryRes.data,
-        savingsRate: totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0
+        savingsRate: totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0,
       });
     } catch (err) {
       console.error(err);
@@ -80,11 +84,12 @@ const Dashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeFilter]);
 
+  // Fetch dashboard whenever user, timeFilter, or refreshFlag changes
   useEffect(() => {
     if (user) fetchDashboardData();
-  }, [user, timeFilter]);
+  }, [user, timeFilter, refreshFlag, fetchDashboardData]);
 
   // ---------- UI Components ----------
   const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (
@@ -163,43 +168,41 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-  {/* Recent Transactions */}
-  <div className="bg-white rounded-2xl shadow-lg border p-6">
-    <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Transactions</h2>
-    <div className="space-y-2">
-      {dashboardData.recentTransactions.length > 0 ? (
-        dashboardData.recentTransactions.map(t => (
-          <TransactionItem key={t._id} transaction={t} />
-        ))
-      ) : (
-        <div className="text-center py-8">
-          <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No transactions yet</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Recent Transactions */}
+          <div className="bg-white rounded-2xl shadow-lg border p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Transactions</h2>
+            <div className="space-y-2">
+              {dashboardData.recentTransactions.length > 0 ? (
+                dashboardData.recentTransactions.map(t => (
+                  <TransactionItem key={t._id} transaction={t} />
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No transactions yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Top Expenses / Graph */}
+          <div className="bg-white rounded-2xl shadow-lg border p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Top Expenses</h2>
+            <div className="space-y-3">
+              {dashboardData.expensesByCategory.length > 0 ? (
+                dashboardData.expensesByCategory.slice(0, 5).map((cat, i) => (
+                  <CategoryItem key={i} category={cat} isExpense />
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <PieChart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No expenses recorded</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      )}
-    </div>
-  </div>
-
-  {/* Top Expenses / Graph */}
-  <div className="bg-white rounded-2xl shadow-lg border p-6">
-    <h2 className="text-xl font-bold text-gray-800 mb-4">Top Expenses</h2>
-    <div className="space-y-3">
-      {dashboardData.expensesByCategory.length > 0 ? (
-        dashboardData.expensesByCategory.slice(0, 5).map((cat, i) => (
-          <CategoryItem key={i} category={cat} isExpense />
-        ))
-      ) : (
-        <div className="text-center py-8">
-          <PieChart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No expenses recorded</p>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-
       </div>
     </div>
   );

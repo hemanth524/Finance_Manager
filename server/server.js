@@ -25,6 +25,7 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 app.use('/api/receipts', require('./routes/receiptRoutes'));
+app.use("/api/transactions/pdf", require("./routes/transactionPDFRoutes"));
 
 // Test route
 app.get('/', (req, res) => {
