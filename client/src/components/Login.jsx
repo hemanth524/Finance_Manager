@@ -6,26 +6,29 @@ import * as z from "zod";
 import API from "../api";
 import { AuthContext } from "../context/AuthContext";
 
+// Zod schema for form validation
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export default function Login({ onSuccess, onSwitchToSignup }) {
-  const { login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext); // Auth context for login
   const navigate = useNavigate();
+  
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema), // Validation using zod
   });
 
+  // Form submission handler
   const onSubmit = async (values) => {
     try {
       const { data } = await API.post("/auth/login", values);
-      login(data?.user ?? null, data?.token ?? null);
-      onSuccess?.();
-      navigate("/dashboard");
+      login(data?.user ?? null, data?.token ?? null); // Save user & token in context
+      onSuccess?.(); // Optional callback
+      navigate("/dashboard"); // Redirect after login
     } catch (err) {
-      alert(err?.response?.data?.message || "Login failed");
+      alert(err?.response?.data?.message || "Login failed"); // Show error
     }
   };
 
@@ -34,8 +37,9 @@ export default function Login({ onSuccess, onSwitchToSignup }) {
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Welcome Back
       </h2>
+
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* Email */}
+        {/* Email input */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
@@ -47,7 +51,7 @@ export default function Login({ onSuccess, onSwitchToSignup }) {
           {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
         </div>
 
-        {/* Password */}
+        {/* Password input */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
           <input
@@ -59,8 +63,9 @@ export default function Login({ onSuccess, onSwitchToSignup }) {
           {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>}
         </div>
 
-        {/* Actions */}
+        {/* Form actions */}
         <div className="flex items-center justify-between mt-6">
+          {/* Switch to signup */}
           <button
             type="button"
             onClick={onSwitchToSignup}
@@ -68,6 +73,8 @@ export default function Login({ onSuccess, onSwitchToSignup }) {
           >
             Don’t have an account?
           </button>
+
+          {/* Submit button */}
           <button
             type="submit"
             disabled={isSubmitting}

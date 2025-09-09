@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import API from "../api";
-import { AuthContext } from "../context/AuthContext";
+import API from "../api"; // API module for HTTP requests
+import { AuthContext } from "../context/AuthContext"; // Auth context for login
 
+// Zod validation schema for signup form
 const registrationSchema = z
   .object({
     name: z.string().min(3, "Full name must be at least 3 characters"),
@@ -16,36 +17,44 @@ const registrationSchema = z
       message: "You must accept the terms and conditions",
     }),
   })
+  // Custom refinement to ensure password and confirmPassword match
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
 export default function Signup({ onSuccess, onSwitchToLogin }) {
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // Access login function from context
+  const navigate = useNavigate(); // Navigation hook
+
+  // React Hook Form setup with zod validation
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(registrationSchema),
-    defaultValues: { terms: false },
+    defaultValues: { terms: false }, // Terms checkbox default
   });
 
+  // Handle form submission
   const onSubmit = async (values) => {
     try {
+      // Send signup request to backend
       const res = await API.post("/auth/signup", {
         name: values.name,
         email: values.email,
         password: values.password,
       });
+
       if (res?.data?.token && res?.data?.user) {
+        // If signup returns token & user, log in automatically
         login(res.data.user, res.data.token);
-        onSuccess?.();
-        navigate("/dashboard");
+        onSuccess?.(); // Optional callback
+        navigate("/dashboard"); // Redirect to dashboard
       } else {
+        // Otherwise, notify user and switch to login
         alert(res?.data?.message || "Signup successful. Please log in.");
         onSwitchToLogin?.();
       }
     } catch (err) {
-      alert(err?.response?.data?.message || "Signup failed");
+      alert(err?.response?.data?.message || "Signup failed"); // Handle errors
     }
   };
 
@@ -54,8 +63,9 @@ export default function Signup({ onSuccess, onSwitchToLogin }) {
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Create an Account
       </h2>
+
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* Name */}
+        {/* Full Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
           <input
@@ -103,7 +113,7 @@ export default function Signup({ onSuccess, onSwitchToLogin }) {
           {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>}
         </div>
 
-        {/* Terms */}
+        {/* Terms & Conditions */}
         <div className="flex items-center gap-2">
           <input
             id="terms"
@@ -120,6 +130,7 @@ export default function Signup({ onSuccess, onSwitchToLogin }) {
 
         {/* Actions */}
         <div className="flex items-center justify-between mt-6">
+          {/* Switch to login */}
           <button
             type="button"
             onClick={onSwitchToLogin}
@@ -127,6 +138,8 @@ export default function Signup({ onSuccess, onSwitchToLogin }) {
           >
             Already have an account?
           </button>
+
+          {/* Submit button */}
           <button
             type="submit"
             disabled={isSubmitting}

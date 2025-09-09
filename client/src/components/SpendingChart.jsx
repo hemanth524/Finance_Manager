@@ -3,18 +3,19 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import API from "../api";
 
 const SpendingChart = ({ type }) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([]); // Stores summary data from API
 
-const fetchSummary = async () => {
-  try {
-    const res = await API.get(`/transactions/summary?type=${type}`);
-    // summary endpoint still returns array, so it's fine
-    setData(res.data);
-  } catch (err) {
-    console.error("Failed to fetch summary", err);
-  }
-};
+  // Fetch category-wise transaction summary (expense or income)
+  const fetchSummary = async () => {
+    try {
+      const res = await API.get(`/transactions/summary?type=${type}`);
+      setData(res.data); // Response is already an array of { category, total }
+    } catch (err) {
+      console.error("Failed to fetch summary", err);
+    }
+  };
 
+  // Refetch whenever type (expense/income) changes
   useEffect(() => {
     fetchSummary();
   }, [type]);
@@ -24,11 +25,14 @@ const fetchSummary = async () => {
       <h3>{type === "expense" ? "Expense by Category" : "Income by Category"}</h3>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="total" fill={type === "expense" ? "#e53935" : "#43a047"} />
+          <CartesianGrid strokeDasharray="3 3" /> {/* Grid lines */}
+          <XAxis dataKey="category" />             {/* X-axis = category name */}
+          <YAxis />                                {/* Y-axis = totals */}
+          <Tooltip />                              {/* Tooltip on hover */}
+          <Bar 
+            dataKey="total" 
+            fill={type === "expense" ? "#e53935" : "#43a047"} // Red = expense, green = income
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
