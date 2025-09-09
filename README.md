@@ -1,3 +1,6 @@
+# Youtube Demo Link
+https://youtu.be/keblTQmBJ0E
+
 # AI-Powered Finance Manager
 
 An intelligent web application designed to simplify personal finance management. Users can track income and expenses manually or automate the process by uploading receipts (images/PDFs) and transaction statements (PDFs). It leverages Google's Gemini AI to parse and categorize transactions automatically, providing insightful visualizations of financial habits.
