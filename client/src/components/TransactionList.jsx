@@ -143,13 +143,11 @@ const TransactionList = () => {
         fetchTransactions(1, {});
     };
 
-    // --- NEW HANDLERS for delete and update ---
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this transaction?")) {
             try {
                 await API.delete(`/transactions/${id}`);
                 toast.success("Transaction deleted successfully!");
-                // Refresh data after deletion
                 fetchTransactions(page, { from: fromDate, to: toDate });
             } catch (err) {
                 toast.error(err.response?.data?.error || "Failed to delete transaction");
@@ -218,8 +216,8 @@ const TransactionList = () => {
                                         {/* --- NEW ACTIONS CELL --- */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-4">
-                                                <button onClick={() => handleOpenModal(t)} className="text-blue-400 hover:text-blue-300 transition" title="Edit"><EditIcon /></button>
-                                                <button onClick={() => handleDelete(t._id)} className="text-red-400 hover:text-red-300 transition" title="Delete"><DeleteIcon /></button>
+                                                <button onClick={() => handleOpenModal(t)} className="text-blue-400 hover:text-blue-300 hover:cursor-pointer transition" title="Edit"><EditIcon /></button>
+                                                <button onClick={() => handleDelete(t._id)} className="text-red-400 hover:text-red-300 hover:cursor-pointer transition" title="Delete"><DeleteIcon /></button>
                                             </div>
                                         </td>
                                     </tr>
