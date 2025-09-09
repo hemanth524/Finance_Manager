@@ -6,7 +6,9 @@ const fs = require('fs');
 const path = require('path');
 
 // Load env
-dotenv.config();
+dotenv.config({
+  path: path.join(__dirname, ".env")
+});
 
 // Connect to MongoDB
 connectDB();
@@ -21,17 +23,19 @@ app.use(express.json());
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
+app.use(express.static(path.join(__dirname, "../client/dist")))
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 app.use('/api/receipts', require('./routes/receiptRoutes'));
 app.use("/api/transactions/pdf", require("./routes/transactionPDFRoutes"));
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Finance Assistant Backend is running...');
-});
+app.get("/{*any}", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"))
+})
 
+console.log(process.env.NODE_ENV);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
